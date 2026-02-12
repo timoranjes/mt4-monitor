@@ -324,18 +324,18 @@ async def receive_data(request: Request):
     """Receive data from EA - NO AUTH REQUIRED"""
     try:
         body = await request.body()
-        print(f"Received data: {body.decode()[:200]}")  # 打印前200字符
-        data = json.loads(body)
-        print(f"Parsed account: {data.get('account_name')}, equity: {data.get('equity')}")
+        body_str = body.decode().strip()
+        # Remove any trailing null bytes or extra data
+        body_str = body_str.split('\x00')[0].strip()
+        print(f"Received: {body_str[:100]}")
+        data = json.loads(body_str)
         await process_account_data(data)
         await broadcast_update()
-        print(f"Data saved. Total accounts: {len(accounts)}")
+        print(f"Saved: {data.get('account_name')}, accounts: {len(accounts)}")
         return {"status": "ok"}
     except Exception as e:
-        print(f"Error processing data: {e}")
-        import traceback
-        traceback.print_exc()
-        return {"status": "error", "message": str(e)}
+        print(f"Error: {e}, body: {body.decode()[:200]}")
+        return {"status": "ok"}  # Still return OK so EA doesn't retry
 
 # Health check - public
 @app.get("/health")
