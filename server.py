@@ -831,9 +831,6 @@ def get_dashboard_html():
         <button class="filter-btn" data-filter="LIVE">🔴 Live</button>
         <button class="filter-btn" data-filter="CENT">🟡 Cent</button>
         <button class="filter-btn" data-filter="DEMO">🔵 Demo</button>
-        <button class="filter-btn" data-filter="PROP_FTMO">🟣 FTMO</button>
-        <button class="filter-btn" data-filter="PROP_DARWINEX">🟢 Darwinex</button>
-        <button class="filter-btn" data-filter="PROP_5ERS">🔵 5ers</button>
     </div>
     
     <div class="accounts-table">
