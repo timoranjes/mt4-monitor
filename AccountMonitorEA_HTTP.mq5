@@ -1,7 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                       AccountMonitorEA_HTTP.mq5  |
 //|              MT5 Account Monitor via HTTP (No ZMQ Required)        |
-//|              Uses built-in WebRequest function                     |
 //+------------------------------------------------------------------+
 #property copyright "Clawd Trading Tools"
 #property version   "3.00"
@@ -35,12 +34,11 @@ int OnInit()
 {
    g_initialBalance = AccountInfoDouble(ACCOUNT_BALANCE);
    
-   Print("AccountMonitor HTTP v3.0 (MT5) initialized");
+   Print("AccountMonitor HTTP v3.0 initialized");
    Print("Account: ", InpAccountName);
    Print("Type: ", GetAccountTypeString(InpAccountType));
    Print("Server: ", InpServerURL);
    
-   // Send initial data
    SendAccountData();
    
    return(INIT_SUCCEEDED);
@@ -95,7 +93,6 @@ void SendAccountData()
       profit     *= multiplier;
    }
    
-   // Positions count
    int totalPositions = PositionsTotal();
    double openProfit = 0;
    
@@ -108,43 +105,46 @@ void SendAccountData()
    
    if(InpIsCentAccount) openProfit *= multiplier;
    
-   // Calculate PnL
    double totalPnL = equity - g_initialBalance;
+   double totalPnLPct = g_initialBalance > 0 ? (totalPnL / g_initialBalance * 100) : 0;
    
    // Build JSON
-   string json = BuildJSON(
-      InpAccountName,
-      GetAccountTypeString(InpAccountType),
-      InpPropFirm,
-      login,
-      company,
-      server,
-      currency,
-      InpIsCentAccount,
-      balance,
-      equity,
-      margin,
-      freeMargin,
-      profit,
-      openProfit,
-      marginLevel,
-      totalPositions,
-      InpChallengeSize,
-      g_initialBalance * multiplier,
-      profit,
-      totalPnL,
-      InpDailyLossAlertPct
-   );
+   string json = "{" +
+      "\"account_name\":\"" + InpAccountName + "\"," +
+      "\"account_type\":\"" + GetAccountTypeString(InpAccountType) + "\"," +
+      "\"prop_firm\":\"" + InpPropFirm + "\"," +
+      "\"login\":" + IntegerToString(login) + "," +
+      "\"company\":\"" + company + "\"," +
+      "\"server\":\"" + server + "\"," +
+      "\"currency\":\"" + currency + "\"," +
+      "\"is_cent\":" + (InpIsCentAccount ? "true" : "false") + "," +
+      "\"is_ftmo_1step\":false," +
+      "\"balance\":" + DoubleToString(balance, 2) + "," +
+      "\"equity\":" + DoubleToString(equity, 2) + "," +
+      "\"margin\":" + DoubleToString(margin, 2) + "," +
+      "\"free_margin\":" + DoubleToString(freeMargin, 2) + "," +
+      "\"profit\":" + DoubleToString(profit, 2) + "," +
+      "\"open_profit\":" + DoubleToString(openProfit, 2) + "," +
+      "\"margin_level\":" + DoubleToString(marginLevel, 2) + "," +
+      "\"positions_count\":" + IntegerToString(totalPositions) + "," +
+      "\"challenge_size\":" + DoubleToString(InpChallengeSize, 2) + "," +
+      "\"initial_balance\":" + DoubleToString(g_initialBalance * multiplier, 2) + "," +
+      "\"today_pnl\":" + DoubleToString(profit, 2) + "," +
+      "\"today_pnl_pct\":" + DoubleToString(profit / (g_initialBalance > 0 ? g_initialBalance : 1) * 100, 2) + "," +
+      "\"total_pnl\":" + DoubleToString(totalPnL, 2) + "," +
+      "\"total_pnl_pct\":" + DoubleToString(totalPnLPct, 2) + "," +
+      "\"daily_loss_alert_pct\":" + DoubleToString(InpDailyLossAlertPct, 2) +
+   "}";
    
-   // Prepare data for WebRequest
+   // Prepare data for WebRequest - use correct 7-parameter version
    char data[], result[];
    StringToCharArray(json, data);
-   int dataSize = ArraySize(data);
    
-   string headers;
+   string headers = "Content-Type: application/json\r\n";
+   string result_headers;
    
-   // Send HTTP POST - use 6 parameter version
-   int res = WebRequest("POST", InpServerURL, g_timeout, data, result, headers);
+   // WebRequest: method, url, headers, timeout, data, result, result_headers
+   int res = WebRequest("POST", InpServerURL, headers, g_timeout, data, result, result_headers);
    
    if(res == 200)
    {
@@ -156,63 +156,6 @@ void SendAccountData()
       if(res == -1)
          Print("Error: ", GetLastError(), " - Check Tools->Options->EA Trading allow WebRequest for ", InpServerURL);
    }
-}
-
-//+------------------------------------------------------------------+
-//| Build JSON string                                                |
-//+------------------------------------------------------------------+
-string BuildJSON(
-   string account_name,
-   string account_type,
-   string prop_firm,
-   long login,
-   string company,
-   string server,
-   string currency,
-   bool is_cent,
-   double balance,
-   double equity,
-   double margin,
-   double free_margin,
-   double profit,
-   double open_profit,
-   double margin_level,
-   int positions_count,
-   double challenge_size,
-   double initial_balance,
-   double today_pnl,
-   double total_pnl,
-   double daily_loss_alert_pct
-)
-{
-   string json = "{" +
-      "\"account_name\":\"" + account_name + "\"," +
-      "\"account_type\":\"" + account_type + "\"," +
-      "\"prop_firm\":\"" + prop_firm + "\"," +
-      "\"login\":" + IntegerToString(login) + "," +
-      "\"company\":\"" + company + "\"," +
-      "\"server\":\"" + server + "\"," +
-      "\"currency\":\"" + currency + "\"," +
-      "\"is_cent\":" + (is_cent ? "true" : "false") + "," +
-      "\"is_ftmo_1step\":false," +
-      "\"balance\":" + DoubleToString(balance, 2) + "," +
-      "\"equity\":" + DoubleToString(equity, 2) + "," +
-      "\"margin\":" + DoubleToString(margin, 2) + "," +
-      "\"free_margin\":" + DoubleToString(free_margin, 2) + "," +
-      "\"profit\":" + DoubleToString(profit, 2) + "," +
-      "\"open_profit\":" + DoubleToString(open_profit, 2) + "," +
-      "\"margin_level\":" + DoubleToString(margin_level, 2) + "," +
-      "\"positions_count\":" + IntegerToString(positions_count) + "," +
-      "\"challenge_size\":" + DoubleToString(challenge_size, 2) + "," +
-      "\"initial_balance\":" + DoubleToString(initial_balance, 2) + "," +
-      "\"today_pnl\":" + DoubleToString(today_pnl, 2) + "," +
-      "\"today_pnl_pct\":" + DoubleToString(today_pnl / (initial_balance > 0 ? initial_balance : 1) * 100, 2) + "," +
-      "\"total_pnl\":" + DoubleToString(total_pnl, 2) + "," +
-      "\"total_pnl_pct\":" + DoubleToString(total_pnl / (initial_balance > 0 ? initial_balance : 1) * 100, 2) + "," +
-      "\"daily_loss_alert_pct\":" + DoubleToString(daily_loss_alert_pct, 2) +
-   "}";
-   
-   return json;
 }
 
 //+------------------------------------------------------------------+
