@@ -560,13 +560,18 @@ async def get_accounts(credentials: HTTPBasicCredentials = Depends(verify_creden
 
 @app.post("/api/data")
 async def receive_data(data: dict):
-    """HTTP endpoint for simplified EA (no ZMQ required)"""
+    """HTTP endpoint for simplified EA (no ZMQ required, no auth)"""
     try:
         await process_account_data_http(data)
         return {"status": "ok"}
     except Exception as e:
         print(f"Error processing HTTP data: {e}")
         return {"status": "error", "message": str(e)}
+
+# Health check endpoint
+@app.get("/health")
+async def health():
+    return {"status": "ok", "accounts": len(accounts)}
 
 @app.get("/api/accounts/{account_name}/history")
 async def get_account_history(account_name: str, hours: int = 24, credentials: HTTPBasicCredentials = Depends(verify_credentials)):
