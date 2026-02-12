@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                       AccountMonitorEA_HTTP.mq5  |
+//|                                       AccountMonitorEA_Fixed.mq5  |
 //|              MT5 Account Monitor - JSON Fix Version                |
 //+------------------------------------------------------------------+
 #property copyright "Clawd Trading Tools"
@@ -48,13 +48,18 @@ void SendAccountData()
    double equity   = AccountInfoDouble(ACCOUNT_EQUITY);
    double profit   = AccountInfoDouble(ACCOUNT_PROFIT);
    
-   // Build simple JSON manually - NO special characters
+   // Escape quotes in strings
+   string safeAccount = EscapeQuotes(InpAccountName);
+   string safeCompany = EscapeQuotes(company);
+   string safeServer  = EscapeQuotes(server);
+   
+   // Build simple JSON
    string json = "{";
-   json += "\"account_name\":\"" + StringReplace(InpAccountName, "\"", "'") + "\",";
+   json += "\"account_name\":\"" + safeAccount + "\",";
    json += "\"account_type\":\"" + GetType(InpAccountType) + "\",";
    json += "\"login\":" + IntegerToString(login) + ",";
-   json += "\"company\":\"" + StringReplace(company, "\"", "'") + "\",";
-   json += "\"server\":\"" + StringReplace(server, "\"", "'") + "\",";
+   json += "\"company\":\"" + safeCompany + "\",";
+   json += "\"server\":\"" + safeServer + "\",";
    json += "\"currency\":\"" + currency + "\",";
    json += "\"balance\":" + DoubleToString(balance, 2) + ",";
    json += "\"equity\":" + DoubleToString(equity, 2) + ",";
@@ -83,14 +88,14 @@ string GetType(int t)
    return "DEMO";
 }
 
-string StringReplace(string str, string from, string to)
+string EscapeQuotes(string str)
 {
    string result = str;
-   int pos = StringFind(result, from);
+   int pos = StringFind(result, "\"");
    while(pos != -1)
    {
-      result = StringSubstr(result, 0, pos) + to + StringSubstr(result, pos + StringLen(from));
-      pos = StringFind(result, from, pos + StringLen(to));
+      result = StringSubstr(result, 0, pos) + "'" + StringSubstr(result, pos + 1);
+      pos = StringFind(result, "\"", pos + 1);
    }
    return result;
 }
