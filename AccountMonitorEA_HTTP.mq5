@@ -26,7 +26,7 @@ input int      InpUpdateInterval = 5;
 //--- Global Variables
 datetime g_lastSend = 0;
 double   g_initialBalance = 0;
-string   g_cookie = NULL;
+string   g_headers = "Content-Type: application/json\r\n";
 int      g_timeout = 5000;
 
 //+------------------------------------------------------------------+
@@ -111,7 +111,6 @@ void SendAccountData()
    
    // Calculate PnL
    double totalPnL = equity - g_initialBalance;
-   double totalPnLPct = g_initialBalance > 0 ? (totalPnL / g_initialBalance * 100) : 0;
    
    // Build JSON
    string json = BuildJSON(
@@ -138,15 +137,15 @@ void SendAccountData()
       InpDailyLossAlertPct
    );
    
-   // Send HTTP POST using WebRequest
+   // Prepare data for WebRequest
    char data[], result[];
-   string headers;
-   int res;
-   
    StringToCharArray(json, data);
-   StringToCharArray("Content-Type: application/json\r\n", headers);
    
-   res = WebRequest("POST", InpServerURL, headers, g_timeout, data, result, headers);
+   char headers[];
+   StringToCharArray(g_headers, headers);
+   
+   // Send HTTP POST
+   int res = WebRequest("POST", InpServerURL, NULL, NULL, g_timeout, data, result, headers);
    
    if(res == 200)
    {
@@ -156,7 +155,7 @@ void SendAccountData()
    {
       Print("Failed to send data. Error: ", res);
       if(res == -1)
-         Print("Error details: ", GetLastError());
+         Print("Error: ", GetLastError(), " - Check Tools->Options->EA Trading allow WebRequest for ", InpServerURL);
    }
 }
 
