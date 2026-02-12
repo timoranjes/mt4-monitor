@@ -1,15 +1,15 @@
+# Fix for Windows Python 3.12 + zmq compatibility - MUST be before importing zmq
+import sys
+import asyncio
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import zmq.asyncio
-import asyncio
 import json
-
-# Fix for Windows Python 3.12 + zmq compatibility
-import sys
-if sys.platform == 'win32':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 import sqlite3
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
