@@ -324,12 +324,17 @@ async def receive_data(request: Request):
     """Receive data from EA - NO AUTH REQUIRED"""
     try:
         body = await request.body()
+        print(f"Received data: {body.decode()[:200]}")  # 打印前200字符
         data = json.loads(body)
+        print(f"Parsed account: {data.get('account_name')}, equity: {data.get('equity')}")
         await process_account_data(data)
         await broadcast_update()
+        print(f"Data saved. Total accounts: {len(accounts)}")
         return {"status": "ok"}
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error processing data: {e}")
+        import traceback
+        traceback.print_exc()
         return {"status": "error", "message": str(e)}
 
 # Health check - public
