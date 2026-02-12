@@ -726,6 +726,7 @@ def get_dashboard_html():
         .badge.ftmo { background: #8b5cf620; color: #8b5cf6; }
         .badge.ftmo-1step { background: #ec489920; color: #ec4899; }
         .badge.darwinex { background: #06b6d420; color: #06b6d4; }
+        .badge.ers { background: #3b82f620; color: #3b82f6; }
         .badge.offline { background: #ef444420; color: #ef4444; }
         .badge.alert { background: #ef444420; color: #ef4444; animation: pulse 1.5s infinite; }
         
@@ -832,6 +833,7 @@ def get_dashboard_html():
         <button class="filter-btn" data-filter="DEMO">🔵 Demo</button>
         <button class="filter-btn" data-filter="PROP_FTMO">🟣 FTMO</button>
         <button class="filter-btn" data-filter="PROP_DARWINEX">🟢 Darwinex</button>
+        <button class="filter-btn" data-filter="PROP_5ERS">🔵 5ers</button>
     </div>
     
     <div class="accounts-table">
@@ -882,7 +884,7 @@ def get_dashboard_html():
         
         function getBadgeClass(type, is1step) {
             if (is1step) return 'ftmo-1step';
-            return {CENT: 'cent', PROP_FTMO: 'ftmo', PROP_DARWINEX: 'darwinex'}[type] || 'live';
+            return {CENT: 'cent', PROP_FTMO: 'ftmo', PROP_DARWINEX: 'darwinex', PROP_5ERS: 'ers'}[type] || 'live';
         }
         
         function render() {
@@ -892,13 +894,13 @@ def get_dashboard_html():
             const filtered = Object.values(accounts).filter(a => {
                 if (currentFilter === 'all') return true;
                 if (currentFilter === 'personal') return ['LIVE', 'CENT'].includes(a.account_type);
-                if (currentFilter === 'prop') return ['PROP_FTMO', 'PROP_DARWINEX'].includes(a.account_type);
+                if (currentFilter === 'prop') return ['PROP_FTMO', 'PROP_DARWINEX', 'PROP_5ERS'].includes(a.account_type);
                 return a.account_type === currentFilter;
             });
             
             Object.values(accounts).forEach(a => {
                 if (['LIVE', 'CENT'].includes(a.account_type)) counts.personal++;
-                if (['PROP_FTMO', 'PROP_DARWINEX'].includes(a.account_type)) counts.prop++;
+                if (['PROP_FTMO', 'PROP_DARWINEX', 'PROP_5ERS'].includes(a.account_type)) counts.prop++;
             });
             
             filtered.forEach(a => {

@@ -37,11 +37,12 @@ input int      InpUpdateInterval = 5;             // 更新间隔(秒)
 //--- 枚举
 enum ENUM_ACCOUNT_TYPE
 {
-   ACCOUNT_LIVE,      // 实盘
-   ACCOUNT_CENT,      // Cent账户
-   ACCOUNT_PROP_FTMO, // FTMO挑战
+   ACCOUNT_LIVE,          // 实盘
+   ACCOUNT_CENT,          // Cent账户
+   ACCOUNT_PROP_FTMO,     // FTMO挑战
    ACCOUNT_PROP_DARWINEX, // Darwinex
-   ACCOUNT_DEMO       // 模拟
+   ACCOUNT_PROP_5ERS,     // 5ers
+   ACCOUNT_DEMO           // 模拟
 };
 
 //--- 全局变量
@@ -732,12 +733,13 @@ string GetAccountTypeString(ENUM_ACCOUNT_TYPE type)
 {
    switch(type)
    {
-      case ACCOUNT_LIVE:      return "LIVE";
-      case ACCOUNT_CENT:      return "CENT";
-      case ACCOUNT_PROP_FTMO: return "PROP_FTMO";
+      case ACCOUNT_LIVE:          return "LIVE";
+      case ACCOUNT_CENT:          return "CENT";
+      case ACCOUNT_PROP_FTMO:     return "PROP_FTMO";
       case ACCOUNT_PROP_DARWINEX: return "PROP_DARWINEX";
-      case ACCOUNT_DEMO:      return "DEMO";
-      default:                return "UNKNOWN";
+      case ACCOUNT_PROP_5ERS:     return "PROP_5ERS";
+      case ACCOUNT_DEMO:          return "DEMO";
+      default:                    return "UNKNOWN";
    }
 }
 //+------------------------------------------------------------------+
