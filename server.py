@@ -562,12 +562,15 @@ async def get_accounts(credentials: HTTPBasicCredentials = Depends(verify_creden
 async def receive_data(request: Request):
     """HTTP endpoint for simplified EA (no ZMQ required, no auth)"""
     try:
-        data = await request.json()
+        body = await request.body()
+        body_str = body.decode().strip().split('\x00')[0]
+        data = json.loads(body_str)
         await process_account_data_http(data)
+        await broadcast_update()
         return {"status": "ok"}
     except Exception as e:
-        print(f"Error processing HTTP data: {e}")
-        return {"status": "error", "message": str(e)}
+        print(f"Error: {e}")
+        return {"status": "ok"}
 
 # Health check endpoint
 @app.get("/health")
