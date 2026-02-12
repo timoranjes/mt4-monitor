@@ -4,10 +4,10 @@ import asyncio
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from pydantic import BaseModel
 import zmq.asyncio
 import json
 import sqlite3
@@ -461,6 +461,13 @@ async def process_account_data(data: dict):
         accounts[account_name] = account
         save_to_history(account)
 
+async def process_account_data_http(data: dict):
+    """HTTP version - add timestamp if missing"""
+    if 'timestamp' not in data:
+        data['timestamp'] = int(datetime.now().timestamp())
+    await process_account_data(data)
+    await broadcast_update()
+
 def save_to_history(account: AccountData):
     """保存账户历史数据"""
     conn = sqlite3.connect('mt4_monitor.db')
@@ -550,6 +557,16 @@ async def dashboard(credentials: HTTPBasicCredentials = Depends(verify_credentia
 async def get_accounts(credentials: HTTPBasicCredentials = Depends(verify_credentials)):
     async with data_lock:
         return {name: acc.to_dict() for name, acc in accounts.items()}
+
+@app.post("/api/data")
+async def receive_data(data: dict):
+    """HTTP endpoint for simplified EA (no ZMQ required)"""
+    try:
+        await process_account_data_http(data)
+        return {"status": "ok"}
+    except Exception as e:
+        print(f"Error processing HTTP data: {e}")
+        return {"status": "error", "message": str(e)}
 
 @app.get("/api/accounts/{account_name}/history")
 async def get_account_history(account_name: str, hours: int = 24, credentials: HTTPBasicCredentials = Depends(verify_credentials)):
