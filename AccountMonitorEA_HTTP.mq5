@@ -26,7 +26,6 @@ input int      InpUpdateInterval = 5;
 //--- Global Variables
 datetime g_lastSend = 0;
 double   g_initialBalance = 0;
-string   g_headers = "Content-Type: application/json\r\n";
 int      g_timeout = 5000;
 
 //+------------------------------------------------------------------+
@@ -140,12 +139,12 @@ void SendAccountData()
    // Prepare data for WebRequest
    char data[], result[];
    StringToCharArray(json, data);
+   int dataSize = ArraySize(data);
    
-   char headers[];
-   StringToCharArray(g_headers, headers);
+   string headers;
    
-   // Send HTTP POST
-   int res = WebRequest("POST", InpServerURL, NULL, NULL, g_timeout, data, result, headers);
+   // Send HTTP POST - use 6 parameter version
+   int res = WebRequest("POST", InpServerURL, g_timeout, data, result, headers);
    
    if(res == 200)
    {
