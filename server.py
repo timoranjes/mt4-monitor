@@ -559,9 +559,10 @@ async def get_accounts(credentials: HTTPBasicCredentials = Depends(verify_creden
         return {name: acc.to_dict() for name, acc in accounts.items()}
 
 @app.post("/api/data")
-async def receive_data(data: dict):
+async def receive_data(request: Request):
     """HTTP endpoint for simplified EA (no ZMQ required, no auth)"""
     try:
+        data = await request.json()
         await process_account_data_http(data)
         return {"status": "ok"}
     except Exception as e:
