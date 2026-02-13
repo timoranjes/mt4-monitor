@@ -550,7 +550,8 @@ async def startup():
     print(f"Telegram notifications: {'enabled' if TELEGRAM_ENABLED else 'disabled'}")
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(credentials: HTTPBasicCredentials = Depends(verify_credentials)):
+async def dashboard():
+    """Dashboard - no auth required for Cloudflare tunnel compatibility"""
     return HTMLResponse(content=get_dashboard_html())
 
 @app.get("/api/accounts")
@@ -605,7 +606,8 @@ async def get_account_history(account_name: str, hours: int = 24, credentials: H
     ]
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, credentials: HTTPBasicCredentials = Depends(verify_credentials)):
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket - no auth required for Cloudflare tunnel compatibility"""
     await websocket.accept()
     active_connections.append(websocket)
     
