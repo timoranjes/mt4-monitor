@@ -554,7 +554,8 @@ async def dashboard(credentials: HTTPBasicCredentials = Depends(verify_credentia
     return HTMLResponse(content=get_dashboard_html())
 
 @app.get("/api/accounts")
-async def get_accounts(credentials: HTTPBasicCredentials = Depends(verify_credentials)):
+async def get_accounts():
+    """Get all accounts - no auth required for Cloudflare tunnel compatibility"""
     async with data_lock:
         return {name: acc.to_dict() for name, acc in accounts.items()}
 
