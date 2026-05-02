@@ -235,7 +235,7 @@ Update Interval: 5
 1. Open browser: http://216.66.53.132:8000
 2. Login:
    - Username: `timoranjes`
-   - Password: `19931017lzc`
+   - Set `MT4_ADMIN_PASS` environment variable before running the server
 3. You should see your account data
 
 ---
