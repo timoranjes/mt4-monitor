@@ -19,7 +19,9 @@ if sys.platform == 'win32':
 
 #--- 配置 ---
 ADMIN_USERNAME = os.getenv("MT4_ADMIN_USER", "timoranjes")
-ADMIN_PASSWORD = os.getenv("MT4_ADMIN_PASS", "19931017lzc")
+ADMIN_PASSWORD = os.getenv("MT4_ADMIN_PASS")
+if not ADMIN_PASSWORD:
+    raise EnvironmentError("MT4_ADMIN_PASS environment variable is required")
 ENABLE_AUTH = os.getenv("MT4_ENABLE_AUTH", "true").lower() == "true"
 TELEGRAM_ENABLED = os.getenv("MT4_TELEGRAM_ENABLED", "true").lower() == "true"
 TELEGRAM_CHAT_ID = os.getenv("MT4_TELEGRAM_CHAT_ID", "6692882496")
