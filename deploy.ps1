@@ -79,7 +79,9 @@ import os
 
 # Configuration
 ADMIN_USERNAME = "timoranjes"
-ADMIN_PASSWORD = "19931017lzc"
+ADMIN_PASSWORD = os.getenv("MT4_ADMIN_PASS")
+if not ADMIN_PASSWORD:
+    raise EnvironmentError("MT4_ADMIN_PASS environment variable is required")
 ENABLE_AUTH = True
 TELEGRAM_ENABLED = True
 TELEGRAM_CHAT_ID = "6692882496"
